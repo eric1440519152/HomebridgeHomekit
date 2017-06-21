@@ -6,20 +6,22 @@ local MQTT_Password = "2000001218"
 
 local sensor = 4
 
-local Temper_Name = "温度串口器"
+local Temper_Name = "温度传感器"
 local Temper_Service = "TemperatureSensor"
 local Temper_Characteristic = "CurrentTemperature"
-local Humi_Name = "湿度串口器"
+local Humi_Name = "湿度传感器"
 local Humi_Service = "HumiditySensor"
 local Humi_Characteristic = "CurrentRelativeHumidity"
 
-m1 = mqtt.Client(chipid.."m1",cycle,MQTT_Username,MQTT_Password)
-m2 = mqtt.Client(chipid.."m2",cycle,MQTT_Username,MQTT_Password)
-m3 = mqtt.Client("flex_lamp1487952",5,MQTT_Username,MQTT_Password)
-m:lwt("homebridge/to/set/reachability", "{\"name\": \"00021\", \"reachable\": false}", 0, 0)
-m1:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"reachable\": false}", 0, 0)
-m2:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"reachable\": false}", 0, 0)
-m3:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-Thermostat\", \"reachable\": false}", 0, 0)
+--初始化MQTT客户端
+Temper_MQTT = mqtt.Client("Temper_MQTT"..chipid,cycle,MQTT_Username,MQTT_Password)
+Humi_MQTT = mqtt.Client("Humi_MQTT"..chipid,cycle,MQTT_Username,MQTT_Password)
+Therm_MQTT = mqtt.Client("Therm_MQTT"..chipid,5,MQTT_Username,MQTT_Password)
+
+--设置离线遗言
+Temper_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"reachable\": false}", 0, 0)
+Humi_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"reachable\": false}", 0, 0)
+Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-Thermostat\", \"reachable\": false}", 0, 0)
 
 print("set up wifi mode")
 wifi.setmode(wifi.STATION)
@@ -55,12 +57,12 @@ function()
 			end
 		)
 
-		m1:connect("192.168.1.17", 1883, 0, 1,
+		Temper_MQTT:connect("192.168.1.17", 1883, 0, 1,
 			function(client)
-				print("m1 connected")
-				-- m1:subscribe("homebridge/from/set",0, function(client) print("subscribe homebridge command success") end)    --订阅控制主题信息
-				m1:publish("homebridge/to/add", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"service\": \""..Temper_Service.."\"}", 0, 0, function(client) print("try to add this "..Temper_Name.." node to homebridge") end)
-				m1:publish("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this "..Temper_Name.." node to online in homebridge") end)
+				print("Temper_MQTT connected")
+				-- Temper_MQTT:subscribe("homebridge/from/set",0, function(client) print("subscribe homebridge command success") end)    --订阅控制主题信息
+				Temper_MQTT:publish("homebridge/to/add", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"service\": \""..Temper_Service.."\"}", 0, 0, function(client) print("try to add this "..Temper_Name.." node to homebridge") end)
+				Temper_MQTT:publish("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this "..Temper_Name.." node to online in homebridge") end)
 			end, 
 			function(client, reason)
 				print("failed reason: "..reason)
@@ -68,12 +70,12 @@ function()
 			end
 		)
 
-		m2:connect("192.168.1.17", 1883, 0, 1,
+		Humi_MQTT:connect("192.168.1.17", 1883, 0, 1,
 			function(client)
-				print("m2 connected")
-				-- m2:subscribe("homebridge/from/set",0, function(client) print("subscribe homebridge command success") end)    --订阅控制主题信息
-				m2:publish("homebridge/to/add", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"service\": \""..Humi_Service.."\"}", 0, 0, function(client) print("try to add this "..Humi_Name.." node to homebridge") end)
-				m2:publish("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this "..Humi_Name.." node to online in homebridge") end)
+				print("Humi_MQTT connected")
+				-- Humi_MQTT:subscribe("homebridge/from/set",0, function(client) print("subscribe homebridge command success") end)    --订阅控制主题信息
+				Humi_MQTT:publish("homebridge/to/add", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"service\": \""..Humi_Service.."\"}", 0, 0, function(client) print("try to add this "..Humi_Name.." node to homebridge") end)
+				Humi_MQTT:publish("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this "..Humi_Name.." node to online in homebridge") end)
 				end, 
 			function(client, reason)
 				print("failed reason: "..reason)
@@ -81,13 +83,13 @@ function()
 			end
 		)
 		
-		m3:connect("192.168.1.17", 1883, 0, 1,
+		Therm_MQTT:connect("192.168.1.17", 1883, 0, 1,
 			function(client)
-				print("m3 connected")
-				m3:subscribe("homebridge/from/set",0)
-				m3:publish("homebridge/to/add", "{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\", \"service\": \"Thermostat\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
-				m3:publish("homebridge/to/set/reachability", "{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
-				m3:publish("homebridge/to/set","{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
+				print("Therm_MQTT connected")
+				Therm_MQTT:subscribe("homebridge/from/set",0)
+				Therm_MQTT:publish("homebridge/to/add", "{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\", \"service\": \"Thermostat\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
+				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
+				Therm_MQTT:publish("homebridge/to/set","{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
 					function(client) 
 						print("set off")
 					end
@@ -123,7 +125,7 @@ function()
 		end
 	)
 	
-	m3:on("message", 
+	Therm_MQTT:on("message", 
 		function(client, topic, data)
 			
 			if data ~= nil then
@@ -173,25 +175,25 @@ function()
 	
 	status, temp, humi, temp_dec, humi_dec = dht.read11(sensor)
 	if status == dht.OK then
-			m1:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Temper_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
+			Temper_MQTT:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Temper_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
 				function(client) 
 					print("sent now "..Temper_Name..":"..temp) 
 				end
 			)
-			m2:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Humi_Name.."\", \"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
+			Humi_MQTT:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Humi_Name.."\", \"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
 				function(client) 
 					print("sent now "..Humi_Name..":"..humi) 
 				end
 			)
-			m3:publish("homebridge/to/set","{\"name\": \"flex_lamp1487952\",\"service_name\":\"light\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
+			Therm_MQTT:publish("homebridge/to/set","{\"name\": \"flex_lamp1487952\",\"service_name\":\"light\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
 				function(client) 
 					print("sent now") 
 				end
 			)
 	elseif status == dht.ERROR_CHECKSUM then
-			print( "m1 DHT Checksum error." )
+			print( "Temper_MQTT DHT Checksum error." )
 	elseif status == dht.ERROR_TIMEOUT then
-			print( "m1 DHT timed out." )
+			print( "Temper_MQTT DHT timed out." )
 	end
 
 end)
