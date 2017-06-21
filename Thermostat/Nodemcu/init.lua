@@ -1,11 +1,17 @@
+--系统配置
 local cycle = 300
 local chipid = node.chipid()..""
+wifi.setmode(wifi.STATION)
+wifi.sta.config("ChinaNet-HomeWifi","hze20001218")
 
+--MQTT用户名设置
 local MQTT_Username = "homekit"
 local MQTT_Password = "2000001218"
 
+--传感器接口设置
 local sensor = 4
 
+--附件类型预置
 local Temper_Name = "温度传感器"
 local Temper_Service = "TemperatureSensor"
 local Temper_Characteristic = "CurrentTemperature"
@@ -23,10 +29,8 @@ Temper_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..
 Humi_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"reachable\": false}", 0, 0)
 Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-Thermostat\", \"reachable\": false}", 0, 0)
 
+--连接Wifi
 print("set up wifi mode")
-wifi.setmode(wifi.STATION)
-wifi.sta.config("ChinaNet-HomeWifi","hze20001218")
---here SSID and PassWord should be modified according your wireless router
 wifi.sta.connect()
 
 tmr.alarm(1, 1000, 1, 
@@ -38,25 +42,7 @@ function()
 		tmr.stop(1)
 		print("Config done, IP is "..wifi.sta.getip())
 		
-		m:connect("192.168.1.17",1883,0,1,
-			function(client)
-				m:subscribe("homebridge/from/set",0)
-				m:publish("homebridge/to/add", "{\"name\": \"00021\", \"service\": \"Switch\"}", 0, 0)
-				m:publish("homebridge/to/set/reachability", "{\"name\": \"00021\", \"reachable\": true}", 0,0) 
-				--gpio.trig(monitor, "both", switching)
-				print("MQTT REG")
-				if gpio.read(i) == 1 then
-					m:publish("homebridge/to/set","{\"name\":\"00021\", \"characteristic\":\"On\", \"value\":true}",0,0)
-				else
-					m:publish("homebridge/to/set","{\"name\":\"00021\", \"characteristic\":\"On\", \"value\":false}",0,0)
-				end
-			end,
-			function(client, reason)
-				print("failed reason: "..reason)
-				node.restart()
-			end
-		)
-
+		--连接温度MQTT
 		Temper_MQTT:connect("192.168.1.17", 1883, 0, 1,
 			function(client)
 				print("Temper_MQTT connected")
@@ -69,7 +55,8 @@ function()
 				node.restart()
 			end
 		)
-
+		
+		--连接湿度MQTT
 		Humi_MQTT:connect("192.168.1.17", 1883, 0, 1,
 			function(client)
 				print("Humi_MQTT connected")
@@ -83,6 +70,7 @@ function()
 			end
 		)
 		
+		--连接恒温器MQTT
 		Therm_MQTT:connect("192.168.1.17", 1883, 0, 1,
 			function(client)
 				print("Therm_MQTT connected")
@@ -100,31 +88,16 @@ function()
 				node.restart()
 			end
 		)
-		
-		
-		
+
 	end
 
 end)
 
+--主循环
 tmr.alarm(0,10000,tmr.ALARM_AUTO, 
 function()
 		
-	m:on("message", 
-		function(client, topic, data) 
-			if data ~= nil then
-				t = cjson.decode(data)
-				if t["name"] == "00021" then
-					if t["value"] == true then
-						gpio.write(i, gpio.LOW)
-					elseif t["value"] == false then
-						gpio.write(i, gpio.HIGH)
-					end
-				end
-			end
-		end
-	)
-	
+	--恒温器收到指令
 	Therm_MQTT:on("message", 
 		function(client, topic, data)
 			
@@ -173,23 +146,31 @@ function()
 		end
 	)
 	
+	-- 主动上传温度传感器及湿度传感器数据
 	status, temp, humi, temp_dec, humi_dec = dht.read11(sensor)
 	if status == dht.OK then
+
+			--上传温度传感器数据
 			Temper_MQTT:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Temper_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
 				function(client) 
 					print("sent now "..Temper_Name..":"..temp) 
 				end
 			)
+
+			--上传湿度传感器数据
 			Humi_MQTT:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Humi_Name.."\", \"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
 				function(client) 
 					print("sent now "..Humi_Name..":"..humi) 
 				end
 			)
+
+			--上传恒温器的温度数据
 			Therm_MQTT:publish("homebridge/to/set","{\"name\": \"flex_lamp1487952\",\"service_name\":\"light\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
 				function(client) 
 					print("sent now") 
 				end
 			)
+			
 	elseif status == dht.ERROR_CHECKSUM then
 			print( "Temper_MQTT DHT Checksum error." )
 	elseif status == dht.ERROR_TIMEOUT then
