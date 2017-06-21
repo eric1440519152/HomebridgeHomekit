@@ -3,9 +3,9 @@ local cycle = 300
 local chipid = node.chipid()..""
 local sensor = 4
 
-local m1_name = "temperature"
-local m1_service = "TemperatureSensor"
-local m1_characteristic = "CurrentTemperature"
+local Temper_Name = "temperature"
+local Temper_Service = "TemperatureSensor"
+local Temper_Characteristic = "CurrentTemperature"
 local m2_name = "humidity"
 local m2_service = "HumiditySensor"
 local m2_characteristic = "CurrentRelativeHumidity"
@@ -18,7 +18,7 @@ m1 = mqtt.Client(chipid.."m1",cycle,"homekit","2000001218")
 m2 = mqtt.Client(chipid.."m2",cycle,"homekit","2000001218")
 m3 = mqtt.Client("flex_lamp1487952",5,"homekit","2000001218")
 m:lwt("homebridge/to/set/reachability", "{\"name\": \"00021\", \"reachable\": false}", 0, 0)
-m1:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..m1_name.."\", \"reachable\": false}", 0, 0)
+m1:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"reachable\": false}", 0, 0)
 m2:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..m2_name.."\", \"reachable\": false}", 0, 0)
 m3:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-Thermostat\", \"reachable\": false}", 0, 0)
 
@@ -60,8 +60,8 @@ function()
 			function(client)
 				print("m1 connected")
 				-- m1:subscribe("homebridge/from/set",0, function(client) print("subscribe homebridge command success") end)    --订阅控制主题信息
-				m1:publish("homebridge/to/add", "{\"name\": \""..chipid.."-"..m1_name.."\", \"service\": \""..m1_service.."\"}", 0, 0, function(client) print("try to add this "..m1_name.." node to homebridge") end)
-				m1:publish("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..m1_name.."\", \"reachable\": true}", 0,0 , function(client) print("set this "..m1_name.." node to online in homebridge") end)
+				m1:publish("homebridge/to/add", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"service\": \""..Temper_Service.."\"}", 0, 0, function(client) print("try to add this "..Temper_Name.." node to homebridge") end)
+				m1:publish("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this "..Temper_Name.." node to online in homebridge") end)
 			end, 
 			function(client, reason)
 				print("failed reason: "..reason)
@@ -174,9 +174,9 @@ function()
 	
 	status, temp, humi, temp_dec, humi_dec = dht.read11(sensor)
 	if status == dht.OK then
-			m1:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..m1_name.."\", \"characteristic\": \""..m1_characteristic.."\", \"value\": "..temp.."}",0,0, 
+			m1:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Temper_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
 				function(client) 
-					print("sent now "..m1_name..":"..temp) 
+					print("sent now "..Temper_Name..":"..temp) 
 				end
 			)
 			m2:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..m2_name.."\", \"characteristic\": \""..m2_characteristic.."\", \"value\": "..humi.."}",0,0, 
