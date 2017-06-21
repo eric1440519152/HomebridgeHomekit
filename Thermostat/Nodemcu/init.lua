@@ -6,15 +6,13 @@ local MQTT_Password = "2000001218"
 
 local sensor = 4
 
-local Temper_Name = "temperature"
+local Temper_Name = "温度串口器"
 local Temper_Service = "TemperatureSensor"
 local Temper_Characteristic = "CurrentTemperature"
-local Humi_Name = "humidity"
+local Humi_Name = "湿度串口器"
 local Humi_Service = "HumiditySensor"
 local Humi_Characteristic = "CurrentRelativeHumidity"
 
-
-m = mqtt.Client("00021",5,MQTT_Username,MQTT_Password)
 m1 = mqtt.Client(chipid.."m1",cycle,MQTT_Username,MQTT_Password)
 m2 = mqtt.Client(chipid.."m2",cycle,MQTT_Username,MQTT_Password)
 m3 = mqtt.Client("flex_lamp1487952",5,MQTT_Username,MQTT_Password)
