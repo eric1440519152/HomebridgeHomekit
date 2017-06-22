@@ -60,6 +60,9 @@ function()
 
 				--添加恒温器附件
 				Therm_MQTT:publish("homebridge/to/add", "{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"service\": \""..Therm_Service.."\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
+				
+				--添加湿度传感器Service
+				Therm_MQTT:publish("homebridge/to/add", "{\"name\":"..Therm_ID..",\"service_name\":\""..Humi_Name.."\", \"service\": \""..Humi_Service.."\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
 				--发送心跳
 				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\"light\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
 				Therm_MQTT:publish("homebridge/to/set","{\"name\":"..Therm_ID..",\"service_name\":\"light\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
