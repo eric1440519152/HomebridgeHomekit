@@ -1,6 +1,8 @@
 --系统配置
 local cycle = 300
 local chipid = node.chipid()..""
+--版本号
+local vn = "v0.1.01"
 wifi.setmode(wifi.STATION)
 wifi.sta.config("ChinaNet-HomeWifi","hze20001218")
 
@@ -12,22 +14,24 @@ local MQTT_Password = "2000001218"
 local sensor = 4
 
 --附件类型预置
+--温度部分直接跟恒温器整合，应该用不上
 local Temper_Name = "温度传感器"
 local Temper_Service = "TemperatureSensor"
 local Temper_Characteristic = "CurrentTemperature"
+--作为一个附件的附加Service注册
 local Humi_Name = "湿度传感器"
 local Humi_Service = "HumiditySensor"
 local Humi_Characteristic = "CurrentRelativeHumidity"
 
+local Therm_Name = "恒温器"
+local Therm_Service = "Thermostat"
+
+
 --初始化MQTT客户端
-Temper_MQTT = mqtt.Client("Temper_MQTT"..chipid,cycle,MQTT_Username,MQTT_Password)
-Humi_MQTT = mqtt.Client("Humi_MQTT"..chipid,cycle,MQTT_Username,MQTT_Password)
 Therm_MQTT = mqtt.Client("Therm_MQTT"..chipid,5,MQTT_Username,MQTT_Password)
 
 --设置离线遗言
-Temper_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"reachable\": false}", 0, 0)
-Humi_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"reachable\": false}", 0, 0)
-Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-Thermostat\", \"reachable\": false}", 0, 0)
+Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \"Tokit_"..Therm_Service.."System_"..chipid.."_"..vn.."\", \"reachable\": false}", 0, 0)
 
 --连接Wifi
 print("set up wifi mode")
