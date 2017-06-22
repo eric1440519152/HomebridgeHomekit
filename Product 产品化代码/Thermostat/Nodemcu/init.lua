@@ -54,10 +54,16 @@ function()
 		Therm_MQTT:connect(MQTT_IP, 1883, 0, 1,
 			function(client)
 				print("Therm_MQTT connected")
+
+				--订阅设置Topic
 				Therm_MQTT:subscribe("homebridge/from/set",0)
-				Therm_MQTT:publish("homebridge/to/add", "{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\", \"service\": \"Thermostat\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
-				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
-				Therm_MQTT:publish("homebridge/to/set","{\"name\":\"flex_lamp1487952\",\"service_name\":\"light\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
+
+				--添加恒温器附件
+				Therm_MQTT:publish("homebridge/to/add", "{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"service\": \""..Therm_Service.."\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
+				--发送心跳
+				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\"light\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
+				Therm_MQTT:publish("homebridge/to/set","{\"name\":"..Therm_ID..",\"service_name\":\"light\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
+					
 					function(client) 
 						print("set off")
 					end
@@ -145,7 +151,7 @@ function()
 			)
 
 			--上传恒温器的温度数据
-			Therm_MQTT:publish("homebridge/to/set","{\"name\": \"flex_lamp1487952\",\"service_name\":\"light\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
+			Therm_MQTT:publish("homebridge/to/set","{\"name\": "..Therm_ID..",\"service_name\":\"light\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
 				function(client) 
 					print("sent now") 
 				end
