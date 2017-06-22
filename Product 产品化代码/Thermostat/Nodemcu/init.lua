@@ -6,7 +6,8 @@ local vn = "v0.1.01"
 wifi.setmode(wifi.STATION)
 wifi.sta.config("ChinaNet-HomeWifi","hze20001218")
 
---MQTT用户名设置
+--MQTT设置
+local MQTT_IP = "192.168.1.17"
 local MQTT_Username = "homekit"
 local MQTT_Password = "2000001218"
 
@@ -39,6 +40,7 @@ Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..", \"re
 print("set up wifi mode")
 wifi.sta.connect()
 
+--初始化循环
 tmr.alarm(1, 1000, 1, 
 function()
 	
@@ -48,36 +50,8 @@ function()
 		tmr.stop(1)
 		print("Config done, IP is "..wifi.sta.getip())
 		
-		--连接温度MQTT
-		Temper_MQTT:connect("192.168.1.17", 1883, 0, 1,
-			function(client)
-				print("Temper_MQTT connected")
-				-- Temper_MQTT:subscribe("homebridge/from/set",0, function(client) print("subscribe homebridge command success") end)    --订阅控制主题信息
-				Temper_MQTT:publish("homebridge/to/add", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"service\": \""..Temper_Service.."\"}", 0, 0, function(client) print("try to add this "..Temper_Name.." node to homebridge") end)
-				Temper_MQTT:publish("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Temper_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this "..Temper_Name.." node to online in homebridge") end)
-			end, 
-			function(client, reason)
-				print("failed reason: "..reason)
-				node.restart()
-			end
-		)
-		
-		--连接湿度MQTT
-		Humi_MQTT:connect("192.168.1.17", 1883, 0, 1,
-			function(client)
-				print("Humi_MQTT connected")
-				-- Humi_MQTT:subscribe("homebridge/from/set",0, function(client) print("subscribe homebridge command success") end)    --订阅控制主题信息
-				Humi_MQTT:publish("homebridge/to/add", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"service\": \""..Humi_Service.."\"}", 0, 0, function(client) print("try to add this "..Humi_Name.." node to homebridge") end)
-				Humi_MQTT:publish("homebridge/to/set/reachability", "{\"name\": \""..chipid.."-"..Humi_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this "..Humi_Name.." node to online in homebridge") end)
-				end, 
-			function(client, reason)
-				print("failed reason: "..reason)
-				node.restart()
-			end
-		)
-		
 		--连接恒温器MQTT
-		Therm_MQTT:connect("192.168.1.17", 1883, 0, 1,
+		Therm_MQTT:connect(MQTT_IP, 1883, 0, 1,
 			function(client)
 				print("Therm_MQTT connected")
 				Therm_MQTT:subscribe("homebridge/from/set",0)
