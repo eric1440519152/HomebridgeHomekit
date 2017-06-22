@@ -170,11 +170,12 @@ function()
 					print("sent now") 
 				end
 			)
-			
+
 	elseif status == dht.ERROR_CHECKSUM then
-			print( "Temper_MQTT DHT Checksum error." )
+		--输出传感器错误
+		print( "Temper_MQTT DHT Checksum error." )
 	elseif status == dht.ERROR_TIMEOUT then
-			print( "Temper_MQTT DHT timed out." )
+		print( "Temper_MQTT DHT timed out." )
 	end
 
 end)
