@@ -26,12 +26,14 @@ local Humi_Characteristic = "CurrentRelativeHumidity"
 local Therm_Name = "恒温器"
 local Therm_Service = "Thermostat"
 
+--预置所有附件NAME字段 作为ID
+Therm_ID = "\"Tokit_"..Therm_Service.."System_"..chipid.."_"..vn.."\""
 
 --初始化MQTT客户端
-Therm_MQTT = mqtt.Client("Therm_MQTT"..chipid,5,MQTT_Username,MQTT_Password)
+Therm_MQTT = mqtt.Client("Therm_MQTT_"..chipid,5,MQTT_Username,MQTT_Password)
 
 --设置离线遗言
-Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\": \"Tokit_"..Therm_Service.."System_"..chipid.."_"..vn.."\", \"reachable\": false}", 0, 0)
+Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..", \"reachable\": false}", 0, 0)
 
 --连接Wifi
 print("set up wifi mode")
