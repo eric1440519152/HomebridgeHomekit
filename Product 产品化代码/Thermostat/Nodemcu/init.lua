@@ -152,24 +152,17 @@ function()
 	status, temp, humi, temp_dec, humi_dec = dht.read11(sensor)
 	if status == dht.OK then
 
-			--上传动作传感器数据
-			Temper_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Moti_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
-				function(client) 
-					print("sent now "..Temper_Name..":"..temp) 
-				end
-			)
-
 			--上传湿度传感器数据
 			Humi_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
 				function(client) 
-					print("sent now "..Humi_Name..":"..humi) 
+					print("Sent_"..Humi_Name..":"..humi) 
 				end
 			)
 
 			--上传恒温器的温度数据
 			Therm_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Therm_Name.."\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
 				function(client) 
-					print("sent now") 
+					print("Sent_"..Temper_Name..":"..temp) 
 				end
 			)
 			
@@ -178,5 +171,14 @@ function()
 	elseif status == dht.ERROR_TIMEOUT then
 			print( "Temper_MQTT DHT timed out." )
 	end
+
+	--上传动作传感器数据
+
+	--读取动作传感器数据
+	Temper_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Moti_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
+		function(client) 
+			print("sent now "..Temper_Name..":"..temp) 
+		end
+	)
 
 end)
