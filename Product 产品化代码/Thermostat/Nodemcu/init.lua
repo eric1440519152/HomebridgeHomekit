@@ -13,6 +13,7 @@ local MQTT_Password = "2000001218"
 
 --传感器接口设置
 local sensor = 4
+local MotionSensor = 5
 
 --附件类型预置
 --温度部分直接跟恒温器整合，应该用不上
@@ -24,6 +25,9 @@ local Humi_Name = "湿度传感器"
 local Humi_Service = "HumiditySensor"
 local Humi_Characteristic = "CurrentRelativeHumidity"
 
+local Moti_Name = "动作传感器"
+local Moti_Service = "MotionSensor"
+--主附件服务
 local Therm_Name = "恒温器"
 local Therm_Service = "Thermostat"
 
@@ -64,6 +68,9 @@ function()
 				--添加湿度传感器Service
 				Therm_MQTT:publish("homebridge/to/add/service", "{\"name\":"..Therm_ID..",\"service_name\":\""..Humi_Name.."\", \"service\": \""..Humi_Service.."\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
 				
+				--添加动作传感器Service
+				Therm_MQTT:publish("homebridge/to/add/service", "{\"name\":"..Therm_ID..",\"service_name\":\""..Moti_Name.."\", \"service\": \""..Moti_Service.."\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
+
 				--发送心跳
 				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
 				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Humi_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
