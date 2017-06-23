@@ -63,18 +63,18 @@ function()
 				Therm_MQTT:subscribe("homebridge/from/set",0)
 
 				--添加恒温器附件
-				Therm_MQTT:publish("homebridge/to/add", "{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"service\": \""..Therm_Service.."\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
+				Therm_MQTT:publish("homebridge/to/add", "{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"service\": \""..Therm_Service.."\"}", 0, 0, function(client) print("ThermostatSystem Added") end)
 				
 				--添加湿度传感器Service
-				Therm_MQTT:publish("homebridge/to/add/service", "{\"name\":"..Therm_ID..",\"service_name\":\""..Humi_Name.."\", \"service\": \""..Humi_Service.."\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
+				Therm_MQTT:publish("homebridge/to/add/service", "{\"name\":"..Therm_ID..",\"service_name\":\""..Humi_Name.."\", \"service\": \""..Humi_Service.."\"}", 0, 0, function(client) print("HumiditySensor Added") end)
 				
 				--添加动作传感器Service
-				Therm_MQTT:publish("homebridge/to/add/service", "{\"name\":"..Therm_ID..",\"service_name\":\""..Moti_Name.."\", \"service\": \""..Moti_Service.."\"}", 0, 0, function(client) print("try to add this Thermostat node to homebridge") end)
+				Therm_MQTT:publish("homebridge/to/add/service", "{\"name\":"..Therm_ID..",\"service_name\":\""..Moti_Name.."\", \"service\": \""..Moti_Service.."\"}", 0, 0, function(client) print("MotionSensor Added") end)
 
 				--发送心跳
-				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
-				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Humi_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
-				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Moti_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
+				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"reachable\": true}", 0,0 , function(client) print("Thermostat Ping") end)
+				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Humi_Name.."\", \"reachable\": true}", 0,0 , function(client) print("HumiditySensor Ping") end)
+				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Moti_Name.."\", \"reachable\": true}", 0,0 , function(client) print("MotionSensor Ping") end)
 
 				--初始化MQTT设置
 				--设置关机
@@ -105,7 +105,7 @@ function()
 			
 			if data ~= nil then
 				t = cjson.decode(data)
-				if t["name"] == "flex_lamp1487952" then
+				if t["name"] == Therm_ID  and t["service_name"] = Therm_Service then
 					if t["characteristic"] == "TargetHeatingCoolingState" then
 						if t["value"] == 0 then
 						-- 关闭
@@ -152,22 +152,22 @@ function()
 	status, temp, humi, temp_dec, humi_dec = dht.read11(sensor)
 	if status == dht.OK then
 
-			--上传温度传感器数据
-			Temper_MQTT:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Temper_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
+			--上传动作传感器数据
+			Temper_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Moti_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
 				function(client) 
 					print("sent now "..Temper_Name..":"..temp) 
 				end
 			)
 
 			--上传湿度传感器数据
-			Humi_MQTT:publish("homebridge/to/set","{\"name\": \""..chipid.."-"..Humi_Name.."\", \"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
+			Humi_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
 				function(client) 
 					print("sent now "..Humi_Name..":"..humi) 
 				end
 			)
 
 			--上传恒温器的温度数据
-			Therm_MQTT:publish("homebridge/to/set","{\"name\": "..Therm_ID..",\"service_name\":\"light\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
+			Therm_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Therm_Name.."\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
 				function(client) 
 					print("sent now") 
 				end
