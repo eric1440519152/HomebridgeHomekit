@@ -6,20 +6,28 @@ local vn = "v0.1.01"
 wifi.setmode(wifi.STATION)
 wifi.sta.config("ChinaNet-HomeWifi","hze20001218")
 
+
 --MQTT设置
 local MQTT_IP = "192.168.1.17"
 local MQTT_Username = "homekit"
 local MQTT_Password = "2000001218"
 
+
 --传感器接口设置
 local sensor = 4
 local MotionSensor = 5
+
 
 --附件类型预置
 --温度部分直接跟恒温器整合，应该用不上
 local Temper_Name = "温度传感器"
 local Temper_Service = "TemperatureSensor"
 local Temper_Characteristic = "CurrentTemperature"
+
+--主附件服务
+local Therm_Name = "恒温器"
+local Therm_Service = "Thermostat"
+
 --作为一个附件的附加Service注册
 local Humi_Name = "湿度传感器"
 local Humi_Service = "HumiditySensor"
@@ -27,9 +35,10 @@ local Humi_Characteristic = "CurrentRelativeHumidity"
 
 local Moti_Name = "动作传感器"
 local Moti_Service = "MotionSensor"
---主附件服务
-local Therm_Name = "恒温器"
-local Therm_Service = "Thermostat"
+
+
+--全局状态变量
+local MotionSensor_State = "False"
 
 --预置所有附件NAME字段 作为ID
 Therm_ID = "\"Tokit_"..Therm_Service.."System_"..chipid.."_"..vn.."\""
@@ -40,8 +49,11 @@ Therm_MQTT = mqtt.Client("Therm_MQTT_"..chipid,5,MQTT_Username,MQTT_Password)
 --设置离线遗言
 Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..", \"reachable\": false}", 0, 0)
 
+--传感器初始化
+gpio.mode(MotionSensor,gpio.INPUT)
+
 --连接Wifi
-print("set up wifi mode")
+print("Set up Wifi")
 wifi.sta.connect()
 
 --初始化循环
@@ -167,14 +179,28 @@ function()
 			)
 			
 	elseif status == dht.ERROR_CHECKSUM then
-			print( "Temper_MQTT DHT Checksum error." )
+			print( "DHT Checksum error." )
 	elseif status == dht.ERROR_TIMEOUT then
-			print( "Temper_MQTT DHT timed out." )
+			print( "DHT timed out." )
+	end
+
+	
+	--动作传感器
+
+
+	--读取动作传感器数据
+	if gpio.read(MotionSensor) == 1 then
+		--检测到人
+		MotionSensor_State = "True"
+	elseif gpio.read(MotionSensor) == 0 then
+		--未检测到人
+		MotionSensor_State = "False"
+	else
+		--其他错误
+		MotionSensor_State = "Err"
 	end
 
 	--上传动作传感器数据
-
-	--读取动作传感器数据
 	Temper_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Moti_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
 		function(client) 
 			print("sent now "..Temper_Name..":"..temp) 
