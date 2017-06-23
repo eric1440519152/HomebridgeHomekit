@@ -74,9 +74,9 @@ function()
 				--发送心跳
 				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
 				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Humi_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
-				
+				Therm_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..",\"service_name\":\""..Moti_Name.."\", \"reachable\": true}", 0,0 , function(client) print("set this Thermostat node to online in homebridge") end)
+
 				--初始化MQTT设置
-				
 				--设置关机
 				Therm_MQTT:publish("homebridge/to/set","{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
 					
