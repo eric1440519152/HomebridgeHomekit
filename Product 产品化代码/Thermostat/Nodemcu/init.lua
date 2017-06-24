@@ -17,6 +17,9 @@ local MQTT_Password = "2000001218"
 local sensor = 4
 local MotionSensor = 3
 
+--数据通信口设置
+local Thermostat_Temper_Arduino = 1
+local Thermostat_Mode_Arduino = 0
 
 --附件类型预置
 --温度部分直接跟恒温器整合，应该用不上
@@ -108,7 +111,7 @@ function()
 end)
 
 --主循环
-tmr.alarm(0,10000,tmr.ALARM_AUTO, 
+tmr.alarm(0,1500,tmr.ALARM_AUTO, 
 function()
 		
 	--恒温器收到指令
@@ -117,43 +120,43 @@ function()
 			
 			if data ~= nil then
 				t = cjson.decode(data)
-				if t["name"] == Therm_ID  and t["service_name"] == Therm_Service then
+				if t["name"] == Therm_ID  and t["service_name"] == Therm_Name then
 					if t["characteristic"] == "TargetHeatingCoolingState" then
 						if t["value"] == 0 then
 						-- 关闭
 						print("off")
-						pwm.setup(5,500,100) 
-						pwm.start(5)
+						pwm.setup(Thermostat_Mode_Arduino,500,100) 
+						pwm.start(Thermostat_Mode_Arduino)
 						elseif t["value"] == 1 then
 						-- 制热
 						print("hot")
-						pwm.setup(5,500,200)
-						pwm.start(5)
+						pwm.setup(Thermostat_Mode_Arduino,500,200)
+						pwm.start(Thermostat_Mode_Arduino)
 						elseif t["value"] == 2 then
 						-- 制冷
 						print("cold")
-						pwm.setup(5,500,300)
-						pwm.start(5)
+						pwm.setup(Thermostat_Mode_Arduino,500,300)
+						pwm.start(Thermostat_Mode_Arduino)
 						elseif t["value"] == 3 then
 						-- 自动
 						print("auto")
-						pwm.setup(5,500,400)
-						pwm.start(5)
+						pwm.setup(Thermostat_Mode_Arduino,500,400)
+						pwm.start(Thermostat_Mode_Arduino)
 						end
 					elseif t["characteristic"] == "TargetTemperature" then
 						if  t["value"] <= 16 then
-							pwm.setup(6,500,160)
-							pwm.start(6)
+							pwm.setup(Thermostat_Temper_Arduino,500,160)
+							pwm.start(Thermostat_Temper_Arduino)
 						elseif t["value"] >= 31 then
-							pwm.setup(6,500,310)
-							pwm.start(6)
+							pwm.setup(Thermostat_Temper_Arduino,500,310)
+							pwm.start(Thermostat_Temper_Arduino)
 						else
 							i = t["value"] 
 							i = i * 10
-							pwm.setup(6,500,i)
-							pwm.start(6)
+							pwm.setup(Thermostat_Temper_Arduino,500,i)
+							pwm.start(Thermostat_Temper_Arduino)
 						end
-						print(t["value"])
+						print("Sent_Set_Temper:"..t["value"])
 					end
 				end
 			end
@@ -165,16 +168,16 @@ function()
 	if status == dht.OK then
 
 			--上传湿度传感器数据
-			Therm_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
+			Therm_MQTT:publish("homebridge/to/set","{\"name\": "..Therm_ID..",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
 				function(client) 
-					print("Sent_"..Humi_Name..":"..humi) 
+					print("Sent_"..Humi_Service..":"..humi) 
 				end
 			)
 
 			--上传恒温器的温度数据
-			Therm_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Therm_Name.."\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
+			Therm_MQTT:publish("homebridge/to/set","{\"name\": "..Therm_ID..",\"service_name\":\""..Therm_Name.."\", \"characteristic\": \"CurrentTemperature\", \"value\": "..temp.."}",0,0, 
 				function(client) 
-					print("Sent_"..Temper_Name..":"..temp) 
+					print("Sent_"..Temper_Service..":"..temp) 
 				end
 			)
 			
@@ -191,19 +194,19 @@ function()
 	--读取动作传感器数据
 	if gpio.read(MotionSensor) == 1 then
 		--检测到人
-		MotionSensor_State = "True"
+		MotionSensor_State = "true"
 	elseif gpio.read(MotionSensor) == 0 then
 		--未检测到人
-		MotionSensor_State = "False"
+		MotionSensor_State = "false"
 	else
 		--其他错误
 		MotionSensor_State = "Err"
 	end
 
 	--上传动作传感器数据
-	Therm_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Moti_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
+	Therm_MQTT:publish("homebridge/to/set","{\"name\": "..Therm_ID..",\"service_name\":\""..Moti_Name.."\", \"characteristic\": \"MotionDetected\", \"value\": "..MotionSensor_State.."}",0,0, 
 		function(client) 
-			print("sent now "..Temper_Name..":"..temp) 
+			print("Sent_"..Moti_Service..":"..MotionSensor_State) 
 		end
 	)
 
