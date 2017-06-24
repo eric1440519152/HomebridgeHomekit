@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h>
 
-int pin_1 = 7; //定义引脚为7
-int pin_2 = 8; //定义引脚为8
+int pin_1 = 13; //定义引脚为13
+int pin_2 = 12; //定义引脚为12
 
 unsigned long duration;
 unsigned long duration_2;
