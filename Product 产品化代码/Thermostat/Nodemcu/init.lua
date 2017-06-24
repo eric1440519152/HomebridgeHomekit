@@ -165,7 +165,7 @@ function()
 	if status == dht.OK then
 
 			--上传湿度传感器数据
-			Humi_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
+			Therm_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
 				function(client) 
 					print("Sent_"..Humi_Name..":"..humi) 
 				end
