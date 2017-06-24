@@ -15,7 +15,7 @@ local MQTT_Password = "2000001218"
 
 --传感器接口设置
 local sensor = 4
-local MotionSensor = 5
+local MotionSensor = 3
 
 
 --附件类型预置
