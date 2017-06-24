@@ -117,7 +117,7 @@ function()
 			
 			if data ~= nil then
 				t = cjson.decode(data)
-				if t["name"] == Therm_ID  and t["service_name"] = Therm_Service then
+				if t["name"] == Therm_ID  and t["service_name"] == Therm_Service then
 					if t["characteristic"] == "TargetHeatingCoolingState" then
 						if t["value"] == 0 then
 						-- 关闭
