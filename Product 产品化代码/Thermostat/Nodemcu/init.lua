@@ -201,7 +201,7 @@ function()
 	end
 
 	--上传动作传感器数据
-	Temper_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Moti_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
+	Therm_MQTT:publish("homebridge/to/set","{\"name\": \""..Therm_ID.."\",\"service_name\":\""..Moti_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
 		function(client) 
 			print("sent now "..Temper_Name..":"..temp) 
 		end
