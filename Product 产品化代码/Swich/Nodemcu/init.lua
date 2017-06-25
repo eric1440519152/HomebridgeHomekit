@@ -14,6 +14,7 @@ local MQTT_Password = "2000001218"
 
 --传感器接口设置
 local Swich =1
+local sensor = 4
 
 --附件类型预置
 local Temper_Name = "温度传感器"
@@ -112,5 +113,29 @@ function()
 			end
 		end
 	)
+
+	-- 主动上传温度传感器及湿度传感器数据
+	status, temp, humi, temp_dec, humi_dec = dht.read11(sensor)
+	if status == dht.OK then
+
+			--上传湿度传感器数据
+			Therm_MQTT:publish("homebridge/to/set","{\"name\": "..WaterSystem_ID..",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
+				function(client) 
+					print("Sent_"..Humi_Service..":"..humi) 
+				end
+			)
+
+			--上传恒温器的温度数据
+			Therm_MQTT:publish("homebridge/to/set","{\"name\": "..WaterSystem_ID..",\"service_name\":\""..Temper_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
+				function(client) 
+					print("Sent_"..Temper_Service..":"..temp) 
+				end
+			)
+			
+	elseif status == dht.ERROR_CHECKSUM then
+			print( "DHT Checksum error." )
+	elseif status == dht.ERROR_TIMEOUT then
+			print( "DHT timed out." )
+	end
 
 end)
