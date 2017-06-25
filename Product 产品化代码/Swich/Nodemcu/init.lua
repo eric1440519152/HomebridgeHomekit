@@ -13,8 +13,8 @@ local MQTT_Username = "homekit"
 local MQTT_Password = "2000001218"
 
 --传感器接口设置
-local Swich =1
-local sensor = 4
+local Switch = 5
+local sensor = 6
 
 --附件类型预置
 local Temper_Name = "温度传感器"
@@ -26,8 +26,8 @@ local Humi_Name = "湿度传感器"
 local Humi_Service = "HumiditySensor"
 local Humi_Characteristic = "CurrentRelativeHumidity"
 
-local Swich_Name = "淋花阀门"
-local Swich_Service = "Swich"
+local Switch_Name = "淋花阀门"
+local Switch_Service = "Switch"
 
 --预置所有附件NAME字段 作为ID
 WaterSystem_ID = "\"Tokit_WaterSystem_"..chipid.."_"..vn.."\""
@@ -40,7 +40,7 @@ WaterSystem_MQTT = mqtt.Client("WaterSystem_MQTT"..chipid,5,MQTT_Username,MQTT_P
 WaterSystem_MQTT:lwt("homebridge/to/set/reachability", "{\"name\":"..WaterSystem_ID..", \"reachable\": false}", 0, 0)
 
 --传感器初始化
-gpio.mode(Swich,gpio.OUTPUT)
+gpio.mode(Switch,gpio.OUTPUT)
 
 --连接Wifi
 print("Set up Wifi")
@@ -63,7 +63,7 @@ function()
 				WaterSystem_MQTT:subscribe("homebridge/from/set",0)
 
 				--添加开关附件
-				WaterSystem_MQTT:publish("homebridge/to/add", "{\"name\": "..WaterSystem_ID..",\"service_name\":\""..Swich_Name.."\", \"service\": \""..Swich_Service.."\"}", 0, 0)
+				WaterSystem_MQTT:publish("homebridge/to/add", "{\"name\":"..WaterSystem_ID..",\"service_name\":\""..Switch_Name.."\", \"service\": \""..Switch_Service.."\"}", 0, 0)
 				
 				--添加湿度传感器Service
 				WaterSystem_MQTT:publish("homebridge/to/add/service", "{\"name\":"..WaterSystem_ID..",\"service_name\":\""..Humi_Name.."\", \"service\": \""..Humi_Service.."\"}", 0, 0, function(client) print("HumiditySensor Added") end)
@@ -73,17 +73,17 @@ function()
 				
 				
 				--发送心跳
-				WaterSystem_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..WaterSystem_ID..",\"service_name\":\""..Swich_Name.."\", \"reachable\": true}", 0,0) 
+				WaterSystem_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..WaterSystem_ID..",\"service_name\":\""..Switch_Name.."\", \"reachable\": true}", 0,0) 
 				WaterSystem_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..WaterSystem_ID..",\"service_name\":\""..Humi_Name.."\", \"reachable\": true}", 0,0 )
 				WaterSystem_MQTT:publish("homebridge/to/set/reachability", "{\"name\":"..WaterSystem_ID..",\"service_name\":\""..Temper_Name.."\", \"reachable\": true}", 0,0 )
 				
 				--初始化
 				print("MQTT REG")
-
-				if gpio.read(i) == 1 then
-					WaterSystem_MQTT:publish("homebridge/to/set","{\"name\":"..WaterSystem_ID..", \"characteristic\":\"On\", \"value\":true}",0,0)
+				
+				if gpio.read(Switch) == 1 then
+					WaterSystem_MQTT:publish("homebridge/to/set","{\"name\":"..WaterSystem_ID..",\"service_name\":\""..Switch_Name.."\", \"characteristic\":\"On\", \"value\":true}",0,0)
 				else
-					WaterSystem_MQTT:publish("homebridge/to/set","{\"name\":"..WaterSystem_ID..", \"characteristic\":\"On\", \"value\":false}",0,0)
+					WaterSystem_MQTT:publish("homebridge/to/set","{\"name\":"..WaterSystem_ID..",\"service_name\":\""..Switch_Name.."\", \"characteristic\":\"On\", \"value\":false}",0,0)
 				end
 
 			end,
@@ -103,11 +103,11 @@ function()
 		function(client, topic, data) 
 			if data ~= nil then
 				t = cjson.decode(data)
-				if t["name"] == Swich_Name then
+				if t["name"] == WaterSystem_ID_Raw and t["service_name"] == Switch_Name then
 					if t["value"] == true then
-						gpio.write(Swich, gpio.HIGH)
+						gpio.write(Switch, gpio.HIGH)
 					elseif t["value"] == false then
-						gpio.write(Swich, gpio.LOW)
+						gpio.write(Switch, gpio.LOW)
 					end
 				end
 			end
@@ -119,14 +119,14 @@ function()
 	if status == dht.OK then
 
 			--上传湿度传感器数据
-			Therm_MQTT:publish("homebridge/to/set","{\"name\": "..WaterSystem_ID..",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
+			WaterSystem_MQTT:publish("homebridge/to/set","{\"name\": "..WaterSystem_ID..",\"service_name\":\""..Humi_Name.."\",\"characteristic\": \""..Humi_Characteristic.."\", \"value\": "..humi.."}",0,0, 
 				function(client) 
 					print("Sent_"..Humi_Service..":"..humi) 
 				end
 			)
 
 			--上传恒温器的温度数据
-			Therm_MQTT:publish("homebridge/to/set","{\"name\": "..WaterSystem_ID..",\"service_name\":\""..Temper_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
+			WaterSystem_MQTT:publish("homebridge/to/set","{\"name\": "..WaterSystem_ID..",\"service_name\":\""..Temper_Name.."\", \"characteristic\": \""..Temper_Characteristic.."\", \"value\": "..temp.."}",0,0, 
 				function(client) 
 					print("Sent_"..Temper_Service..":"..temp) 
 				end
