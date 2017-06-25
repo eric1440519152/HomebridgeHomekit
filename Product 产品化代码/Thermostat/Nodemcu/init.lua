@@ -19,7 +19,7 @@ local MotionSensor = 3
 
 --数据通信口设置
 local Thermostat_Temper_Arduino = 1
-local Thermostat_Mode_Arduino = 0
+local Thermostat_Mode_Arduino = 2
 
 --附件类型预置
 --温度部分直接跟恒温器整合，应该用不上
@@ -45,6 +45,7 @@ local MotionSensor_State = "False"
 
 --预置所有附件NAME字段 作为ID
 Therm_ID = "\"Tokit_"..Therm_Service.."System_"..chipid.."_"..vn.."\""
+Therm_ID_Raw = "Tokit_"..Therm_Service.."System_"..chipid.."_"..vn
 
 --初始化MQTT客户端
 Therm_MQTT = mqtt.Client("Therm_MQTT_"..chipid,5,MQTT_Username,MQTT_Password)
@@ -54,6 +55,8 @@ Therm_MQTT:lwt("homebridge/to/set/reachability", "{\"name\":"..Therm_ID..", \"re
 
 --传感器初始化
 gpio.mode(MotionSensor,gpio.INPUT)
+gpio.mode(Thermostat_Mode_Arduino,gpio.OUTPUT)
+gpio.mode(Thermostat_Temper_Arduino,gpio.OUTPUT)
 
 --连接Wifi
 print("Set up Wifi")
@@ -120,7 +123,7 @@ function()
 			
 			if data ~= nil then
 				t = cjson.decode(data)
-				if t["name"] == Therm_ID  and t["service_name"] == Therm_Name then
+				if t["name"] == Therm_ID_Raw  and t["service_name"] == Therm_Name then
 					if t["characteristic"] == "TargetHeatingCoolingState" then
 						if t["value"] == 0 then
 						-- 关闭
