@@ -36,6 +36,17 @@ tmr.alarm(1,1000,1,
             tmr.stop(1) 
             print("Config done, IP is "..wifi.sta.getip())
             
+            RGBlight_MQTT:connect(MQTT_IP,1883,0,1,
+                function(client)
+
+                    --订阅设置Topic
+				    WaterSystem_MQTT:subscribe("homebridge/from/set",0)
+                end,
+                function(client, reason)
+                    print("failed reason: "..reason)
+                    node.restart()
+			    end
+            )
         end
     end
 )
