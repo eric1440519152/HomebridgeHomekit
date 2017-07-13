@@ -21,7 +21,7 @@ RGBlight_ID_Raw = "Tokit_RGBlight_"..chipid.."_"..vn
 RGBlight_MQTT = mqtt.Client("RGBlight_MQTT"..chipid,5,MQTT_Username,MQTT_Password)
 
 --设置MQTT遗言
-RGBlight_MQTT:lwt("homebridge/to/set/reachability", "{\"name\":"..RGBlight_ID..", \"reachable\": false}", 0, 0)
+RGBlight_MQTT:lwt("tokit/rgblight/set", "{\"state\":\"OFF\", \"brightness\": 0}", 0, 0)
 
 --连接Wifi
 print("Connect Wifi")
@@ -40,7 +40,7 @@ tmr.alarm(1,1000,1,
                 function(client)
 
                     --订阅设置Topic
-				    WaterSystem_MQTT:subscribe("homebridge/from/set",0)
+				    WaterSystem_MQTT:subscribe("tokit/rgblight/set",0)
                 end,
                 function(client, reason)
                     print("failed reason: "..reason)
