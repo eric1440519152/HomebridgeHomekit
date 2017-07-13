@@ -96,7 +96,7 @@ function()
 
 				--初始化MQTT设置
 				--设置关机
-				Therm_MQTT:publish("homebridge/to/set","{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
+				--Therm_MQTT:publish("homebridge/to/set","{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
 					
 					function(client) 
 						print("set off")
