@@ -90,7 +90,15 @@ function()
                         R = t2["r"]
                         G = t2["g"]
                         B = t2["b"]
-                        
+                        ws2812.init()
+                        i, buffer = 0, ws2812.newBuffer(led,3)
+                        tmr.alarm(0,30,1,function()
+                            buffer:fill(R，B, G)
+                            ws2812.write(buffer)
+                        end)
+                        RGBlight_last_R = R
+                        RGBlight_last_G = G
+                        RGBlight_last_B = B
                     end
                 end 
 			end
