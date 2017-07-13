@@ -20,6 +20,9 @@ RGBlight_ID = "\"Tokit_RGBlight_"..chipid.."_"..vn.."\""
 RGBlight_ID_Raw = "Tokit_RGBlight_"..chipid.."_"..vn
 
 --全局状态变量
+local R = 0
+local G = 0
+local B = 0
 local RGBlight_Switch = "False"
 local RGBlight_last_R = 0
 local RGBlight_last_G = 0
@@ -83,7 +86,11 @@ function()
                         --调节亮度
                     else if t["color"] ~= nil then
                         --设置颜色
-
+                        t2 = cjson.decode(t["color"])
+                        R = t2["r"]
+                        G = t2["g"]
+                        B = t2["b"]
+                        
                     end
                 end 
 			end
