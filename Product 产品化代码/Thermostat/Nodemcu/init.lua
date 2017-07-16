@@ -98,10 +98,10 @@ function()
 				--设置关机
 				--Therm_MQTT:publish("homebridge/to/set","{\"name\":"..Therm_ID..",\"service_name\":\""..Therm_Name.."\",\"characteristic\":\"TargetHeatingCoolingState\",\"value\":0}",0,0, 
 					
-					function(client) 
-						print("set off")
-					end
-				)
+					--function(client) 
+						--print("set off")
+					--end
+				--)
 				end, 
 			function(client, reason)
 				print("failed reason: "..reason)
