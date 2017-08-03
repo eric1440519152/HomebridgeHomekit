@@ -4,7 +4,7 @@ local chipid = node.chipid()..""
 --版本号
 local vn = "v0.1.01"
 wifi.setmode(wifi.STATION)
-wifi.sta.config("ChinaNet-HomeWifi","hze20001218")
+wifi.sta.config("esHome-2.4G","hze20001218")
 
 
 --MQTT设置
