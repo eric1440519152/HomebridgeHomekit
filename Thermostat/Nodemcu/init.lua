@@ -2,7 +2,7 @@
 local cycle = 300
 local chipid = node.chipid()..""
 wifi.setmode(wifi.STATION)
-wifi.sta.config("ChinaNet-HomeWifi","hze20001218")
+wifi.sta.config("esHome-2.4G","hze20001218")
 
 --MQTT用户名设置
 local MQTT_Username = "homekit"
