@@ -8,7 +8,7 @@ wifi.sta.config("esHome-2.4G","hze20001218")
 
 
 --MQTT设置
-local MQTT_IP = "192.168.1.17"
+local MQTT_IP = "192.168.0.120"
 local MQTT_Username = "homekit"
 local MQTT_Password = "2000001218"
 
