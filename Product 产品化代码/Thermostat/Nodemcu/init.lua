@@ -8,7 +8,7 @@ wifi.sta.config("esHome-2.4G","hze20001218")
 
 
 --MQTT设置
-local MQTT_IP = "iot.tokit.site"
+local MQTT_IP = "192.168.0.125"
 local MQTT_Username = "homekit"
 local MQTT_Password = "2000001218"
 
